@@ -4,6 +4,7 @@ module.exports = class PWMFan {
   init(eventEmitter, config = {}) {
     this.eventEmitter = eventEmitter
     this.pulses = 0
+    this.dutyCycle = 0
     this.tach = new Gpio(25, {
       mode: Gpio.INPUT,
       pullUpDown: Gpio.PUD_UP,
@@ -27,11 +28,14 @@ module.exports = class PWMFan {
   readSpeed() {
     this.pulses = 0
     setTimeout(() => {
-      this.eventEmitter.emit('speed', this.pulses * 60 / 2)
+      this.eventEmitter.emit('speed', {
+        speed: this.pulses * 60 / 2,
+        dutyCycle: this.dutyCycle
+      })
     }, 1000)
   }
   setSpeed(percent) {
-    console.log(`set fan speed:${percent}`)
+    this.dutyCycle = percent
     let dutyCycle = Math.floor(255 * percent / 100)
     dutyCycle = dutyCycle > 255 ? 255 : dutyCycle < 0 ? 0 : dutyCycle
     this.pwm.pwmWrite(dutyCycle)

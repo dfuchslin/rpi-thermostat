@@ -36,8 +36,8 @@ module.exports = class Thermostat {
       }
       this.fan.setSpeed(speed)
     })
-    this.eventEmitter.on('speed', (fanSpeed) => {
-      console.log(`handleSpeed speed:${fanSpeed}`)
+    this.eventEmitter.on('speed', (status) => {
+      console.log(`handleSpeed speed:${status.speed} dutyCycle:${status.dutyCycle}`)
     })
     setInterval(() => {
       this.sensor.readTemperature()
