@@ -25,8 +25,23 @@ module.exports = class Thermostat {
       this.fan.readSpeed()
     }, UPDATE_INTERVAL)
   }
-  handleTemperatureEvent(temperatureStatus) {
-    console.log(`handleTemp temp:${JSON.stringify(temperatureStatus)}`)
+  handleTemperatureEvent(status) {
+    if (status.error) {
+      console.log('Temperature sensor error!', status.error)
+      return 
+    }
+    console.log(`handleTemp temp:${JSON.stringify(status)}`)
+    if (status.temperature > 30.0) {
+      this.fan.setSpeed(100)
+    } else if (status.temperature > 27) {
+      this.fan.setSpeed(75)
+    } else if (status.temperature > 25) {
+      this.fan.setSpeed(50)
+    } else if (status.temperature > 22) {
+      this.fan.setSpeed(25)
+    } else {
+      this.fan.setSpeed(0)
+    }
   }
   handleFanSpeedEvent(fanSpeed) {
     console.log(`handleSpeed speed:${fanSpeed}`)

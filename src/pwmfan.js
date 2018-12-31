@@ -31,9 +31,9 @@ module.exports = class PWMFan {
     }, 1000)
   }
   setSpeed(percent) {
+    console.log(`set fan speed:${percent}`)
     let dutyCycle = Math.floor(255 * percent / 100)
     dutyCycle = dutyCycle > 255 ? 255 : dutyCycle < 0 ? 0 : dutyCycle
-    console.log(`set fan dutyCycle:${dutyCycle}`)
     this.pwm.pwmWrite(dutyCycle)
   }
 }
