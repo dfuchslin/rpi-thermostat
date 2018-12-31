@@ -5,14 +5,19 @@ module.exports = class Thermostat {
   constructor() {
     this.eventEmitter = new events.EventEmitter()
     this.eventEmitter.on('temp', this.handleTemperatureEvent)
+    this.eventEmitter.on('speed', this.handleFanSpeedEvent)
+  }
+  destroy() {
+    this.sensor.destroy()
+    this.fan.destroy()
   }
   registerSensor(sensor) {
+    sensor.init(this.eventEmitter, this.config)
     this.sensor = sensor
-    this.sensor.eventEmitter = this.eventEmitter
   }
   registerFan(fan) {
+    fan.init(this.eventEmitter, this.config)
     this.fan = fan
-    this.fan.eventEmitter = this.eventEmitter
   }
   start() {
     setInterval(() => {
@@ -21,6 +26,9 @@ module.exports = class Thermostat {
     }, UPDATE_INTERVAL)
   }
   handleTemperatureEvent(temperatureStatus) {
-    console.log(`handleTemperatureEvent temperatureStatus:${JSON.stringify(temperatureStatus)}`)
+    console.log(`handleTemp temp:${JSON.stringify(temperatureStatus)}`)
+  }
+  handleFanSpeedEvent(fanSpeed) {
+    console.log(`handleSpeed speed:${fanSpeed}`)
   }
 }

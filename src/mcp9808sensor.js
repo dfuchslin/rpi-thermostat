@@ -2,9 +2,12 @@ const Mcp9808 = require('mcp9808-temperature-sensor')
 const UNKNOWN_TEMPERATURE = -237.15
 
 module.exports = class MCP9808Sensor {
-  constructor() {
-    this.eventEmitter = {}
+  init(eventEmitter, config = {}) {
+    this.eventEmitter = eventEmitter
     this.setStatusOk(UNKNOWN_TEMPERATURE)
+  }
+  destroy() {
+    console.log('Cleaning up any MCP9808 sensor connections')
   }
   setStatusOk(temp) {
     this.status = {

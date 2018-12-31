@@ -8,3 +8,9 @@ const thermostat = new Thermostat()
 thermostat.registerSensor(new MCP9808Sensor())
 thermostat.registerFan(new PWMFan())
 thermostat.start()
+
+process.on('SIGINT', () => {
+  console.log('Closing down...')
+  thermostat.destroy()
+  process.exit()
+});
