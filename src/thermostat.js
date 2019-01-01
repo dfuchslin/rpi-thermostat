@@ -24,7 +24,7 @@ module.exports = class Thermostat {
         return
       }
       console.log(`handleTemp temp:${JSON.stringify(status)}`)
-      let speed = 0
+      let speed = 15
       if (status.temperature > 30.0) {
         speed = 100
       } else if (status.temperature > 28) {
