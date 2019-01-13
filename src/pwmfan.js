@@ -2,10 +2,12 @@ const Gpio = require('pigpio').Gpio
 
 module.exports = class PWMFan {
   init(eventEmitter, config = {}) {
+    var tachPin = 25
+    var pwmPin = 24
     this.eventEmitter = eventEmitter
     this.pulses = 0
     this.dutyCycle = 0
-    this.tach = new Gpio(25, {
+    this.tach = new Gpio(tachPin, {
       mode: Gpio.INPUT,
       pullUpDown: Gpio.PUD_UP,
       alert: true
@@ -16,7 +18,7 @@ module.exports = class PWMFan {
       }
     }
     this.tach.on('alert', countPulses)
-    this.pwm = new Gpio(24, {
+    this.pwm = new Gpio(pwmPin, {
       mode: Gpio.OUTPUT,
       alert: false
     })
