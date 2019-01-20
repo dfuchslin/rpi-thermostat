@@ -2,8 +2,8 @@ const Gpio = require('pigpio').Gpio
 
 module.exports = class PWMFan {
   init(eventEmitter, config = {}) {
-    var tachPin = 25
-    var pwmPin = 24
+    const tachPin = 27
+    const pwmPin = 4
     this.eventEmitter = eventEmitter
     this.pulses = 0
     this.dutyCycle = 0
@@ -22,7 +22,7 @@ module.exports = class PWMFan {
       mode: Gpio.OUTPUT,
       alert: false
     })
-    this.setSpeed(25)
+    this.setSpeed(50)
   }
   destroy() {
     console.log('Cleaning up any fan connections')

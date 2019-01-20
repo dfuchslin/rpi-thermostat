@@ -36,12 +36,16 @@ module.exports = class MCP9808Sensor {
       then((temp) => {
         this.setStatusOk(temp.celsius)
         this.eventEmitter.emit('temp', this.status)
-        return this.tempSensor.close()
+        this.tempSensor.close()
       }).
       catch((err) => {
         this.setStatusError(err.stack)
         this.eventEmitter.emit('temp', this.status)
-        return this.tempSensor.close()
+        try {
+          this.tempSensor.close()
+        } catch (ignoreError) {
+          // ignore
+        }
       })
   }
 }
