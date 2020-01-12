@@ -4,26 +4,32 @@ const UPDATE_INTERVAL = 5000
 module.exports = class Thermostat {
   constructor() {
     this.eventEmitter = new events.EventEmitter()
+    this.sensors = []
+    this.fans = []
   }
-  destroy() {
-    this.sensor.destroy()
-    this.fan.destroy()
+
+  async destroy() {
+    this.sensors.forEach(async sensor => sensor.destroy())
+    this.fans.forEach(async fan => fan.destroy())
   }
-  registerSensor(sensor) {
-    sensor.init(this.eventEmitter, this.config)
-    this.sensor = sensor
+
+  async registerSensor(sensor) {
+    await sensor.init(this.eventEmitter, this.config)
+    this.sensors.push(sensor)
   }
-  registerFan(fan) {
-    fan.init(this.eventEmitter, this.config)
-    this.fan = fan
+
+  async registerFan(fan) {
+    await fan.init(this.eventEmitter, this.config)
+    this.fans.push(fan)
   }
-  start() {
+
+  async start() {
     this.eventEmitter.on('temp', (status) => {
       if (status.error) {
-        console.log('Temperature sensor error!', status.error)
+        console.log(`${status.device} error!`, status.error)
         return
       }
-      console.log(`handleTemp temp:${JSON.stringify(status)}`)
+      console.log(`${status.device}: handleTemp temp:${JSON.stringify(status)}`)
       let speed = 15
       if (status.temperature > 30.0) {
         speed = 100
@@ -34,15 +40,14 @@ module.exports = class Thermostat {
       } else if (status.temperature > 22) {
         speed = 25
       }
-      this.fan.setSpeed(speed)
+      this.fans.forEach(async fan => fan.setSpeed(speed))
     })
     this.eventEmitter.on('speed', (status) => {
-      console.log(`handleSpeed speed:${status.speed} dutyCycle:${status.dutyCycle}`)
+      console.log(`${status.device}: handleSpeed speed:${status.speed} dutyCycle:${status.dutyCycle}`)
     })
     setInterval(() => {
-      this.sensor.readTemperature()
-      this.fan.readSpeed()
+      this.sensors.forEach(async sensor => sensor.readTemperature())
+      this.fans.forEach(async fan => fan.readSpeed())
     }, UPDATE_INTERVAL)
   }
-
 }

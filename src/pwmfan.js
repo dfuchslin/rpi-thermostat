@@ -1,13 +1,20 @@
 const Gpio = require('pigpio').Gpio
+const SX1509 = require('node-sx1509')
 
 module.exports = class PWMFan {
-  init(eventEmitter, config = {}) {
-    const tachPin = 27
-    const pwmPin = 4
+  constructor(config = {}) {
+    this.sx1509 = config.sx1509
+    this.number = config.number
+    this.pwmPin = config.pwmPin
+    this.tachPin = config.tachPin
+    this.device = `Fan ${this.number}`
+  }
+
+  async init(eventEmitter, thermostatConfig = {}) {
     this.eventEmitter = eventEmitter
     this.pulses = 0
     this.dutyCycle = 0
-    this.tach = new Gpio(tachPin, {
+    this.tach = new Gpio(this.tachPin, {
       mode: Gpio.INPUT,
       pullUpDown: Gpio.PUD_UP,
       alert: true
@@ -18,28 +25,35 @@ module.exports = class PWMFan {
       }
     }
     this.tach.on('alert', countPulses)
-    this.pwm = new Gpio(pwmPin, {
-      mode: Gpio.OUTPUT,
-      alert: false
-    })
-    this.setSpeed(50)
+    try {
+      await this.sx1509.pinMode(this.pwmPin, SX1509.ANALOG_OUTPUT)
+    } catch (e) {
+      console.log(`${this.device}: error!`, e)
+    }
+
+    await this.setSpeed(50)
   }
-  destroy() {
-    console.log('Cleaning up any fan connections')
+
+  async destroy() {
+    console.log(`${this.device}: Cleaning up any fan connections`)
   }
-  readSpeed() {
+
+  async readSpeed() {
     this.pulses = 0
     setTimeout(() => {
       this.eventEmitter.emit('speed', {
+        device: this.device,
         speed: this.pulses * 60 / 2,
         dutyCycle: this.dutyCycle
       })
     }, 1000)
   }
-  setSpeed(percent) {
+
+  async setSpeed(percent) {
     this.dutyCycle = percent
     let dutyCycle = Math.floor(255 * percent / 100)
     dutyCycle = dutyCycle > 255 ? 255 : dutyCycle < 0 ? 0 : dutyCycle
-    this.pwm.pwmWrite(dutyCycle)
+    this.sx1509.analogWrite(this.pwmPin, 255 - dutyCycle)
+      .catch(e => console.log(`${this.device}: error!`, e))
   }
 }

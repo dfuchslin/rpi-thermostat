@@ -6,39 +6,45 @@ module.exports = class MCP9808Sensor {
     this.eventEmitter = eventEmitter
     this.setStatusOk(UNKNOWN_TEMPERATURE)
   }
+
   destroy() {
     console.log('Cleaning up any MCP9808 sensor connections')
   }
+
   setStatusOk(temp) {
     this.status = {
+      device: 'Temperature senson 1',
       temperature: temp,
       timestamp: new Date(),
       error: ''
     }
   }
+
   setStatusError(error) {
     this.status = {
+      device: 'Temperature senson 1',
       temperature: this.status.temperature,
       timestamp: new Date(),
       error
     }
   }
+
   readTemperature() {
     Mcp9808.open({
       i2cBusNumber: 1,
       i2cAddress: 0x18,
       resolution: Mcp9808.RESOLUTION_1_4
-    }).
-      then((sensor) => {
+    })
+      .then((sensor) => {
         this.tempSensor = sensor
         return this.tempSensor.temperature()
-      }).
-      then((temp) => {
+      })
+      .then((temp) => {
         this.setStatusOk(temp.celsius)
         this.eventEmitter.emit('temp', this.status)
         this.tempSensor.close()
-      }).
-      catch((err) => {
+      })
+      .catch((err) => {
         this.setStatusError(err.stack)
         this.eventEmitter.emit('temp', this.status)
         try {
